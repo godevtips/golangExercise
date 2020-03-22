@@ -9,7 +9,7 @@ func main(){
 
   // Dit is een voorbeeld waarbij twee strings waardes worden terug verstuurd
   fmt.Println("\n|------------- Twee string waardes terug sturen ------------------|")
-  waarde1, waarde2 := tweeStringRetouneren()
+  waarde1, waarde2 := tweeStringWaardesRetouneren()
   fmt.Println("Waarde 1: "+waarde1,"\nWaarde 2: "+ waarde2)
   fmt.Println("|-------------------------------------------------------------------|")
 
@@ -55,16 +55,16 @@ func main(){
 }
 
 // Twee string retourneren
-func tweeStringRetouneren() (waarde1 string, waarde2 string) {
-  waarde1 = "string waarde 1 teruggeven"
-  waarde2 = "string waarde 2 teruggeven"
+func tweeStringWaardesRetouneren() (waarde1 string, waarde2 string) {
+  waarde1 = "waarde 1"
+  waarde2 = "waarde 2"
   return
 }
 
 // Vermenigvuldig de doorgegeven int waardes met 10
-func waardeVermenigvuldigen(waarde int) (doorgegevenWaarde int, waardeVermenigVuldigenMet10 int) {
-  doorgegevenWaarde = waarde
-  waardeVermenigVuldigenMet10 = waarde * 10
+func waardeVermenigvuldigen(waarde int) (parameter int, parameterVermenigVuldigenMet10 int) {
+  parameter = waarde
+  parameterVermenigVuldigenMet10 = waarde * 10
   return
 }
 
