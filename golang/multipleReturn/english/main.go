@@ -8,7 +8,6 @@ import ("fmt"
 func main(){
   // This is a simple example that return two strings value
   fmt.Println("\n|------------- Multi return ------------------|")
-  fmt.Println("\n|------------- Multi return ------------------|")
   value1, value2 := multiReturns()
   fmt.Println("Value 1: "+value1,"\nValue 2: "+ value2)
   fmt.Println("|---------------------------------------------|")
