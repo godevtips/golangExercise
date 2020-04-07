@@ -42,12 +42,12 @@ func main(){
 
    // Este ejemplo demuestra retorno de múltiples valores de diferentes tipos
    fmt.Println("\n|------------ Retorno múltiple de different tipos --------------------|")
-   valorDeArgumentoPasado, valorPasadoMultiplicadoPor10, resultadoDeLaTarea := multiplicarValorDeDifferenteTipos(argumento)
-   valorDeArgumentoPasadoConvertidoEnString := strconv.Itoa(valorDeArgumentoPasado)
+   valorDeArgumento, valorPasadoMultiplicadoPor10, resultadoDeLaTarea := multiplicarValorDeDifferenteTipos(argumento)
+   valorDeArgumentoPasadoConvertidoEnString := strconv.Itoa(valorDeArgumento)
    valorPasadoMultiplicadoPor10ConvertidoEnString := strconv.Itoa(valorPasadoMultiplicadoPor10)
 
-   fmt.Println("Valor pasado de tipo int : "+valorDeArgumentoPasadoConvertidoEnString)
-   fmt.Println("Valor multiplicado pasado de tipo int: "+valorPasadoMultiplicadoPor10ConvertidoEnString)
+   fmt.Println("Valor del argumento de tipo int : "+valorDeArgumentoPasadoConvertidoEnString)
+   fmt.Println("Valor del argumento multiplicado y convertido en un tipo int: "+valorPasadoMultiplicadoPor10ConvertidoEnString)
    fmt.Println("Resultado de la tarea en tipo string: "+resultadoDeLaTarea)
    fmt.Println("|------------------------------------------------------------------|")
 }
