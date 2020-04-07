@@ -31,8 +31,6 @@ func main(){
   // Este simple ejemplo demuestra una función de dos valores int en los cuales uno es el valor que se está pasando y el otro se multiplicará por 10
    fmt.Println("\n|------------- Multi retorno de tipo int ------------------|")
    argumento, valorMultiplicar := multiplicarValores(argumento)
-
-
    argumentoConvertidoEnString := strconv.Itoa(argumento)
    ValorMultiplicadoConvertidoEnString := strconv.Itoa(valorMultiplicar)
 
@@ -42,12 +40,12 @@ func main(){
 
    // Este ejemplo demuestra retorno de múltiples valores de diferentes tipos
    fmt.Println("\n|------------ Retorno múltiple de different tipos --------------------|")
-   valorDeArgumento, valorPasadoMultiplicadoPor10, resultadoDeLaTarea := multiplicarValorDeDifferenteTipos(argumento)
-   valorDeArgumentoPasadoConvertidoEnString := strconv.Itoa(valorDeArgumento)
-   valorPasadoMultiplicadoPor10ConvertidoEnString := strconv.Itoa(valorPasadoMultiplicadoPor10)
+   valorDeArgumento, valorMultiplicadoPor10, resultadoDeLaTarea := multiplicarValorDeDifferenteTipos(argumento)
+   valorDeArgumentoConvertidoEnString := strconv.Itoa(valorDeArgumento)valorMultiplicadoPor10ConvertidoEnString
+   valorMultiplicadoPor10ConvertidoEnString := strconv.Itoa(valorMultiplicadoPor10)
 
-   fmt.Println("Valor del argumento de tipo int : "+valorDeArgumentoPasadoConvertidoEnString)
-   fmt.Println("Valor del argumento multiplicado y convertido en un tipo int: "+valorPasadoMultiplicadoPor10ConvertidoEnString)
+   fmt.Println("Valor del argumento de tipo int : "+valorDeArgumentoConvertidoEnString)
+   fmt.Println("Valor del argumento multiplicado y convertido en un tipo int: "+valorMultiplicadoPor10ConvertidoEnString)
    fmt.Println("Resultado de la tarea en tipo string: "+resultadoDeLaTarea)
    fmt.Println("|------------------------------------------------------------------|")
 }
