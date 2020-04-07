@@ -32,7 +32,7 @@ func main(){
    fmt.Println("\n|------------- Multi retorno de tipo int ------------------|")
    argumento, valorMultiplicado := multiplicarValores(argumento)
    argumentoConvertidoEnString := strconv.Itoa(argumento)
-   ValorMultiplicadoConvertidoEnString := strconv.Itoa(valorMultiplicar)
+   ValorMultiplicadoConvertidoEnString := strconv.Itoa(valorMultiplicado)
 
    fmt.Println("Valor del argumento (int): "+argumentoConvertidoEnString)
    fmt.Println("Argumento de multiplicación (int): "+ValorMultiplicadoConvertidoEnString)
