@@ -60,8 +60,8 @@ func multiRetorno() (valor1 string, valor2 string) {
 }
 
 // Multiplica el valor de tipo int por 10
-func multiplicarValores(valor int) (valorPasado int, valorMultiplicado int) {
-  valorPasado = valor
+func multiplicarValores(valor int) (valorDeParametro int, valorMultiplicado int) {
+  valorDeParametro = valor
   valorMultiplicado = valor * 10
   return
 }
