@@ -12,7 +12,11 @@ Als voorwaarde moet je een Git client software op je computer installeren om de 
 
 ### Installatie
 
-Om de broncodes uit te kunnen voeren, verwijzen we naar [Git Kraken] (https://www.gitkraken.com) die stapsgewijze instructies uitlegt van het proces van klonen van de repository tot het draaien van de codes op je computer.
+Om de broncodes uit te kunnen voeren, verwijzen we naar de volgende artikelen:
+* [GoDevtips repository in MacOS/OSX klonen](https://godevtips.com/nl/2020/04/04/godevtips-repository-op-je-mac-klonen/)
+* [GoDevTips repository klonen in Ubuntu](https://godevtips.com/nl/2020/04/02/godevtips-repository-klonen-in-ubuntu/)
+* [GoDevTips repository klonen in Windows](https://godevtips.com/nl/2020/04/04/godevtips-repository-klonen-in-windows/)
+die stapsgewijze instructies uitlegt van het proces van klonen van de repository tot het uitvoeren van de broncodes.
 
 ## Contributie
 Deze repositories is uitsluitend bedoeld voor educatieve doeleinden en alleen geautoriseerde gebruikers hebben toegang tot deze repositories.

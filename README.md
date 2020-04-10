@@ -12,7 +12,12 @@ As a prerequisites you need to download a Git client software to be able to clon
 
 ### Installation
 
-To clone and run these sample codes on your computer/mac we refer to this article [Git Kraken](https://www.gitkraken.com) which provide a step by step instruction.
+To clone and run these sample codes on your computer/mac we refer to these articles:
+* [Clone GoDevTips repository in macOS/OSX](https://godevtips.com/en/2020/04/04/cloning-godevtips-repository-on-your-mac/)
+* [Clone GoDevTips repository in Ubuntu(Linux)](https://godevtips.com/en/2020/04/02/cloning-godevtips-repository-in-ubuntu/)
+* [Clone GoDevTips repository in Windows](https://godevtips.com/en/2020/04/04/cloning-godevtips-repository-in-windows/)
+
+which provide a step by step instruction.
 
 ## Contribution
 
