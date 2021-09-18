@@ -31,6 +31,7 @@ func main() {
 	router.GET("/student", handleGetStudent)
 	router.PATCH("/student/update", updateStudent)
 	router.POST("/student", addStudent)
+	router.DELETE("/student", handleRemoveStudent)
 
 	serverError := http.ListenAndServe(":3000", router)
 	if serverError != nil {
@@ -129,6 +130,31 @@ func addStudent(response http.ResponseWriter, request *http.Request, _ httproute
 		studentList = append(studentList, studentToAdd)
 		sendResponse(http.StatusOK, response, studentToAdd)
 	}
+}
+
+func handleRemoveStudent(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+
+	params := request.URL.Query()
+
+	if params == nil || len(params) == 0 || params["id"] == nil || params["id"][0] == "" {
+		BadRequestResponse(response, "Invalid ID")
+		return
+	}
+
+	studentID := params["id"][0]
+
+	studentIdInt, err := strconv.Atoi(studentID)
+	if err != nil {
+		BadRequestResponse(response, "Invalid ID")
+		return
+	}
+
+	for index, studentFound := range studentList {
+		if studentFound.ID == studentIdInt {
+			studentList = append(studentList[:index], studentList[index+1:]...)
+		}
+	}
+	sendResponseMessage(http.StatusOK, response, errorMessage{Message: "Student removed"})
 }
 
 func updateStudent(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
