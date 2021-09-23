@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"io"
 	"log"
@@ -17,7 +16,7 @@ type student struct {
 	Age  int    `json:"age"`
 }
 
-type errorMessage struct {
+type responseMessage struct {
 	Message string `json:"message"`
 }
 
@@ -48,15 +47,13 @@ func handleGetAllStudent(response http.ResponseWriter, _ *http.Request, _ httpro
 		marshalledResponse, _ := json.Marshal([]student{})
 		_, writerError := response.Write(marshalledResponse)
 		if writerError != nil {
-			fmt.Println(writerError)
-			writeInternalServerError(response)
+			sendInternalServerError(response)
 		}
 	} else {
 		marshalledResponse, _ := json.Marshal(studentList)
 		_, responseWriteError := response.Write(marshalledResponse)
 		if responseWriteError != nil {
-			fmt.Println(responseWriteError)
-			writeInternalServerError(response)
+			sendInternalServerError(response)
 		}
 	}
 }
@@ -92,7 +89,7 @@ func handleGetStudent(response http.ResponseWriter, request *http.Request, _ htt
 	}
 
 	if requestedStudent.ID == -1 {
-		sendResponseMessage(http.StatusNotFound, response, errorMessage{Message: "Record not found"})
+		sendResponseMessage(http.StatusNotFound, response, responseMessage{Message: "Record not found"})
 	} else {
 		sendResponse(http.StatusOK, response, requestedStudent)
 	}
@@ -107,7 +104,7 @@ func addStudent(response http.ResponseWriter, request *http.Request, _ httproute
 		if parseError == io.EOF {
 			BadRequestResponse(response, "Incomplete data")
 		} else {
-			writeInternalServerError(response)
+			sendInternalServerError(response)
 		}
 		return
 	} else if newStudent.Name == "" || newStudent.Age == 0 {
@@ -154,7 +151,7 @@ func handleRemoveStudent(response http.ResponseWriter, request *http.Request, _ 
 			studentList = append(studentList[:index], studentList[index+1:]...)
 		}
 	}
-	sendResponseMessage(http.StatusOK, response, errorMessage{Message: "Student removed"})
+	sendResponseMessage(http.StatusOK, response, responseMessage{Message: "Student removed"})
 }
 
 func updateStudent(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
@@ -180,7 +177,7 @@ func updateStudent(response http.ResponseWriter, request *http.Request, _ httpro
 	parseError := json.NewDecoder(request.Body).Decode(&updatedStudent)
 
 	if !listContainsData {
-		sendResponseMessage(http.StatusNotFound, response, errorMessage{Message: "Record not found!"})
+		sendResponseMessage(http.StatusNotFound, response, responseMessage{Message: "Record not found!"})
 		return
 	}
 
@@ -188,7 +185,7 @@ func updateStudent(response http.ResponseWriter, request *http.Request, _ httpro
 		if parseError == io.EOF {
 			BadRequestResponse(response, "Incomplete data")
 		} else {
-			writeInternalServerError(response)
+			sendInternalServerError(response)
 		}
 		return
 	}
@@ -249,38 +246,38 @@ func sendResponse(statusCode int, response http.ResponseWriter, student student)
 		response.WriteHeader(statusCode)
 		jsonResponse, jsonMarshalError := json.Marshal(student)
 		if jsonMarshalError != nil {
-			writeInternalServerError(response)
+			sendInternalServerError(response)
 		} else {
 			_, jsonResponseError := response.Write(jsonResponse)
 			if jsonResponseError != nil {
-				writeInternalServerError(response)
+				sendInternalServerError(response)
 			}
 		}
 	}
 }
 
-func sendResponseMessage(statusCode int, response http.ResponseWriter, message errorMessage) {
+func sendResponseMessage(statusCode int, response http.ResponseWriter, message responseMessage) {
 
 	if statusCode != 0 && response != nil {
 		mappedAsJson(response)
 		response.WriteHeader(statusCode)
 		jsonResponse, jsonMarshalError := json.Marshal(message)
 		if jsonMarshalError != nil {
-			writeInternalServerError(response)
+			sendInternalServerError(response)
 		} else {
 			_, jsonResponseError := response.Write(jsonResponse)
 			if jsonResponseError != nil {
-				writeInternalServerError(response)
+				sendInternalServerError(response)
 			}
 		}
 	}
 }
 
-func writeInternalServerError(response http.ResponseWriter) {
+func sendInternalServerError(response http.ResponseWriter) {
 
 	mappedAsJson(response)
 	response.WriteHeader(http.StatusInternalServerError)
-	errorResponse := errorMessage{Message: "Unable to handle request"}
+	errorResponse := responseMessage{Message: "Unable to handle request"}
 	errorResponseJson, marshalError := json.Marshal(errorResponse)
 
 	if marshalError != nil {
@@ -294,7 +291,7 @@ func BadRequestResponse(response http.ResponseWriter, message string) {
 
 	mappedAsJson(response)
 	response.WriteHeader(http.StatusBadRequest)
-	errorResponse := errorMessage{Message: message}
+	errorResponse := responseMessage{Message: message}
 	errorResponseJson, marshalError := json.Marshal(errorResponse)
 
 	if marshalError != nil {
