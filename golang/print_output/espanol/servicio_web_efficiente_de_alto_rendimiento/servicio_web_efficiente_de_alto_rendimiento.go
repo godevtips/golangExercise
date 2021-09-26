@@ -44,15 +44,15 @@ func manejarObtenerTodosLosEstudiantes(respuesta http.ResponseWriter, _ *http.Re
 	respuesta.WriteHeader(http.StatusOK)
 
 	if len(listaDeEstudiantes) == 0 {
-		marshalledResponse, _ := json.Marshal([]estudiante{})
-		_, writerError := respuesta.Write(marshalledResponse)
-		if writerError != nil {
+		respuestaJson, _ := json.Marshal([]estudiante{})
+		_, error := respuesta.Write(respuestaJson)
+		if error != nil {
 			enviarErrorInternoDelServidor(respuesta)
 		}
 	} else {
-		marshalledResponse, _ := json.Marshal(listaDeEstudiantes)
-		_, responseWriteError := respuesta.Write(marshalledResponse)
-		if responseWriteError != nil {
+		respuestaJson, _ := json.Marshal(listaDeEstudiantes)
+		_, error := respuesta.Write(respuestaJson)
+		if error != nil {
 			enviarErrorInternoDelServidor(respuesta)
 		}
 	}
@@ -67,10 +67,10 @@ func manejarObtenerEstudiantes(respuesta http.ResponseWriter, peticion *http.Req
 		return
 	}
 
-	studentID := parametros["id"][0]
+	identificacionDelEstudiante := parametros["id"][0]
 
-	studentIdInt, err := strconv.Atoi(studentID)
-	if err != nil {
+	estudianteIDEnFormaEntero, error := strconv.Atoi(identificacionDelEstudiante)
+	if error != nil {
 		RepuestaDeSolicitudIncorrecta(respuesta, "identificación invalida")
 		return
 	}
@@ -83,13 +83,13 @@ func manejarObtenerEstudiantes(respuesta http.ResponseWriter, peticion *http.Req
 
 	for _, estudianteEncontrado := range listaDeEstudiantes {
 
-		if estudianteEncontrado.ID == studentIdInt {
+		if estudianteEncontrado.ID == estudianteIDEnFormaEntero {
 			estudianteSolicitado = estudianteEncontrado
 		}
 	}
 
 	if estudianteSolicitado.ID == -1 {
-		sendResponseMessage(http.StatusNotFound, respuesta, mensajeDeRespuesta{Mensaje: "Registro no encontrado"})
+		enviarRespuestaComoUnMensaje(http.StatusNotFound, respuesta, mensajeDeRespuesta{Mensaje: "Registro no encontrado"})
 	} else {
 		enviarRepuesta(http.StatusOK, respuesta, estudianteSolicitado)
 	}
@@ -98,10 +98,10 @@ func manejarObtenerEstudiantes(respuesta http.ResponseWriter, peticion *http.Req
 func manejarAgregarEstudiante(respuesta http.ResponseWriter, peticion *http.Request, _ httprouter.Params) {
 
 	var nuevoEstudiante estudiante
-	parseError := json.NewDecoder(peticion.Body).Decode(&nuevoEstudiante)
+	error := json.NewDecoder(peticion.Body).Decode(&nuevoEstudiante)
 
-	if parseError != nil {
-		if parseError == io.EOF {
+	if error != nil {
+		if error == io.EOF {
 			RepuestaDeSolicitudIncorrecta(respuesta, "Datos incompletos")
 		} else {
 			enviarErrorInternoDelServidor(respuesta)
@@ -151,7 +151,7 @@ func manejarEliminarEstudiante(respuesta http.ResponseWriter, peticion *http.Req
 			listaDeEstudiantes = append(listaDeEstudiantes[:indice], listaDeEstudiantes[indice+1:]...)
 		}
 	}
-	sendResponseMessage(http.StatusOK, respuesta, mensajeDeRespuesta{Mensaje: "Estudiante eliminado"})
+	enviarRespuestaComoUnMensaje(http.StatusOK, respuesta, mensajeDeRespuesta{Mensaje: "Estudiante eliminado"})
 }
 
 func manejarActualizacionEstudiante(respuesta http.ResponseWriter, peticion *http.Request, _ httprouter.Params) {
@@ -177,7 +177,7 @@ func manejarActualizacionEstudiante(respuesta http.ResponseWriter, peticion *htt
 	errorDeAnalisis := json.NewDecoder(peticion.Body).Decode(&estudianteActualizado)
 
 	if !listaContieneDatos {
-		sendResponseMessage(http.StatusNotFound, respuesta, mensajeDeRespuesta{Mensaje: "Registro no encontrado!"})
+		enviarRespuestaComoUnMensaje(http.StatusNotFound, respuesta, mensajeDeRespuesta{Mensaje: "Registro no encontrado!"})
 		return
 	}
 
@@ -244,19 +244,19 @@ func enviarRepuesta(codigoDeEstado int, respuesta http.ResponseWriter, estudiant
 	if codigoDeEstado != 0 && respuesta != nil {
 		asignadoComoJson(respuesta)
 		respuesta.WriteHeader(codigoDeEstado)
-		jsonResponse, jsonMarshalError := json.Marshal(estudiante)
-		if jsonMarshalError != nil {
+		repuestaEnJson, errorJson := json.Marshal(estudiante)
+		if errorJson != nil {
 			enviarErrorInternoDelServidor(respuesta)
 		} else {
-			_, jsonResponseError := respuesta.Write(jsonResponse)
-			if jsonResponseError != nil {
+			_, respuestaJsonError := respuesta.Write(repuestaEnJson)
+			if respuestaJsonError != nil {
 				enviarErrorInternoDelServidor(respuesta)
 			}
 		}
 	}
 }
 
-func sendResponseMessage(codigoDeEstado int, respuesta http.ResponseWriter, mensaje mensajeDeRespuesta) {
+func enviarRespuestaComoUnMensaje(codigoDeEstado int, respuesta http.ResponseWriter, mensaje mensajeDeRespuesta) {
 
 	if codigoDeEstado != 0 && respuesta != nil {
 		asignadoComoJson(respuesta)
