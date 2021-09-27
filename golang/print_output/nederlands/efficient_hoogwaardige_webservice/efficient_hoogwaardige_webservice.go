@@ -261,11 +261,11 @@ func stuurReactieBericht(statusCode int, reactie http.ResponseWriter, bericht se
 	if statusCode != 0 && reactie != nil {
 		stelAlsJson(reactie)
 		reactie.WriteHeader(statusCode)
-		jsonResponse, jsonMarshalError := json.Marshal(bericht)
-		if jsonMarshalError != nil {
+		jsonReactie, jsonFout := json.Marshal(bericht)
+		if jsonFout != nil {
 			interneServerfoutVerzenden(reactie)
 		} else {
-			_, verzendingFout := reactie.Write(jsonResponse)
+			_, verzendingFout := reactie.Write(jsonReactie)
 			if verzendingFout != nil {
 				interneServerfoutVerzenden(reactie)
 			}
