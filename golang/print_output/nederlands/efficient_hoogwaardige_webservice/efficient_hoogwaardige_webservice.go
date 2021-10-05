@@ -63,7 +63,7 @@ func studentOphalen(reactie http.ResponseWriter, verzoek *http.Request, _ httpro
 	parameter := verzoek.URL.Query()
 
 	if parameter == nil || len(parameter) == 0 || parameter["id"] == nil || parameter["id"][0] == "" {
-		slechteReactieVerzoekenVerzenden(reactie, "ongeldig identiteit")
+		badRequestVersturen(reactie, "ongeldig identiteit")
 		return
 	}
 
@@ -71,7 +71,7 @@ func studentOphalen(reactie http.ResponseWriter, verzoek *http.Request, _ httpro
 
 	studentIdInt, err := strconv.Atoi(studentID)
 	if err != nil {
-		slechteReactieVerzoekenVerzenden(reactie, "ongeldig identiteit")
+		badRequestVersturen(reactie, "ongeldig identiteit")
 		return
 	}
 
@@ -102,13 +102,13 @@ func studentToevoegen(reactie http.ResponseWriter, verzoek *http.Request, _ http
 
 	if verwerkingsFout != nil {
 		if verwerkingsFout == io.EOF {
-			slechteReactieVerzoekenVerzenden(reactie, "Onvolledige gegevens")
+			badRequestVersturen(reactie, "Onvolledige gegevens")
 		} else {
 			interneServerfoutVerzenden(reactie)
 		}
 		return
 	} else if nieuweStudent.Naam == "" || nieuweStudent.Leeftijd == 0 {
-		slechteReactieVerzoekenVerzenden(reactie, "Ontbrekende gegevens")
+		badRequestVersturen(reactie, "Ontbrekende gegevens")
 		return
 	}
 
@@ -134,7 +134,7 @@ func studentVerwijderen(reactie http.ResponseWriter, verzoek *http.Request, _ ht
 	parameter := verzoek.URL.Query()
 
 	if parameter == nil || len(parameter) == 0 || parameter["id"] == nil || parameter["id"][0] == "" {
-		slechteReactieVerzoekenVerzenden(reactie, "ongeldig identiteit")
+		badRequestVersturen(reactie, "ongeldig identiteit")
 		return
 	}
 
@@ -142,7 +142,7 @@ func studentVerwijderen(reactie http.ResponseWriter, verzoek *http.Request, _ ht
 
 	studentIdInt, err := strconv.Atoi(studentID)
 	if err != nil {
-		slechteReactieVerzoekenVerzenden(reactie, "ongeldig identiteit")
+		badRequestVersturen(reactie, "ongeldig identiteit")
 		return
 	}
 
@@ -159,7 +159,7 @@ func updateStudent(reactie http.ResponseWriter, verzoek *http.Request, _ httprou
 	parameter := verzoek.URL.Query()
 
 	if parameter == nil || len(parameter) == 0 || parameter["id"] == nil || parameter["id"][0] == "" {
-		slechteReactieVerzoekenVerzenden(reactie, "ongeldig identiteit")
+		badRequestVersturen(reactie, "ongeldig identiteit")
 		return
 	}
 
@@ -167,7 +167,7 @@ func updateStudent(reactie http.ResponseWriter, verzoek *http.Request, _ httprou
 
 	studentIdInt, err := strconv.Atoi(studentID)
 	if err != nil {
-		slechteReactieVerzoekenVerzenden(reactie, "ongeldig identiteit")
+		badRequestVersturen(reactie, "ongeldig identiteit")
 		return
 	}
 
@@ -183,7 +183,7 @@ func updateStudent(reactie http.ResponseWriter, verzoek *http.Request, _ httprou
 
 	if parseError != nil {
 		if parseError == io.EOF {
-			slechteReactieVerzoekenVerzenden(reactie, "Onvolledige gegevens")
+			badRequestVersturen(reactie, "Onvolledige gegevens")
 		} else {
 			interneServerfoutVerzenden(reactie)
 		}
@@ -287,7 +287,7 @@ func interneServerfoutVerzenden(reactie http.ResponseWriter) {
 	}
 }
 
-func slechteReactieVerzoekenVerzenden(reactie http.ResponseWriter, bericht string) {
+func badRequestVersturen(reactie http.ResponseWriter, bericht string) {
 
 	stelAlsJson(reactie)
 	reactie.WriteHeader(http.StatusBadRequest)
