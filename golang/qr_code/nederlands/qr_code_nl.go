@@ -53,7 +53,7 @@ func qrCodeVersturen(reactie http.ResponseWriter, _ *http.Request, _ httprouter.
 	// HTML-afbeelding met QR-code
 	responsePageHtml := "<!DOCTYPE html><html><body><h1>Voorbeeld QR-code Go Dev Tips</h1>" + qr_code_afbeelding_tag + "</body></html>"
 
-	// Stuur HTML-reactie terug naar de klant
+	// Stuur HTML-reactie
 	_, _ = reactie.Write([]byte(responsePageHtml))
 }
 
