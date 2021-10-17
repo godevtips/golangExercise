@@ -65,7 +65,7 @@ func generateQRCodeHtmlImageTag() string {
 		log.Fatalln("Error generating QR code. ", taskError)
 	}
 
-	// // Encode raw QR code data to base 64
+	// Encode raw QR code data to base 64
 	encodedData := base64.StdEncoding.EncodeToString(qrCodeImageData)
 
 	return "<img src=\"data:image/png;base64, " + encodedData + "\">"

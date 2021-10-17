@@ -10,12 +10,12 @@ import (
 	"os"
 )
 
-var urlDelSitioWeb = "https://www.godevtips.com/es"
-var tamanoDeImagen = 256
+var urlDelSitioWeb = "https://www.godevtips.com/es" // URL de GoDevTips
+var tamanoDeImagen = 256                            // 256 x 256 píxeles
 
 func main() {
 
-	if len(os.Args) == 2 && os.Args[1] == "archivo" { // Determine cuál opción que debe lanzarse
+	if len(os.Args) == 2 && os.Args[1] == "archivo" { // Determine cuál opción debe lanzarse
 
 		// Genere solo los bytes PNG sin procesar
 		nombreDelArchivo := "qr_code.png"
