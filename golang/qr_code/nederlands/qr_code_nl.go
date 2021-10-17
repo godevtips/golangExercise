@@ -18,10 +18,10 @@ func main() {
 	if len(os.Args) == 2 && os.Args[1] == "bestand" { // Bepaal welke optie moet worden gestart
 
 		bestands_naam := "qr_code.png"
-		error := qrcode.WriteFile(websiteURL, qrcode.Medium, afbeeldingsGrootte, bestands_naam)
+		_error := qrcode.WriteFile(websiteURL, qrcode.Medium, afbeeldingsGrootte, bestands_naam)
 
-		if error != nil {
-			log.Fatal("Fout bij genereren van QR-code naar bestand ", error)
+		if _error != nil {
+			log.Fatal("Fout bij genereren van QR-code naar bestand ", _error)
 		} else {
 			fmt.Println("Qr-code bestand aangemaakt!")
 		}
@@ -52,10 +52,10 @@ func qrCodeVersturen(reactie http.ResponseWriter, _ *http.Request, _ httprouter.
 
 func genereerQRCodeHtmlImageTag() string {
 
-	qrCodeAfbeeldingsGegevens, error := qrcode.Encode(websiteURL, qrcode.High, afbeeldingsGrootte)
+	qrCodeAfbeeldingsGegevens, _error := qrcode.Encode(websiteURL, qrcode.High, afbeeldingsGrootte)
 
-	if error != nil {
-		log.Fatalln("Fout bij het genereren van QR-code. ", error)
+	if _error != nil {
+		log.Fatalln("Fout bij het genereren van QR-code. ", _error)
 	}
 
 	gecodeerdeGegevens := base64.StdEncoding.EncodeToString(qrCodeAfbeeldingsGegevens)

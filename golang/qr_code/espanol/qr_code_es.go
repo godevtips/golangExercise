@@ -18,10 +18,10 @@ func main() {
 	if len(os.Args) == 2 && os.Args[1] == "archivo" { // Determine cuál opción que debe lanzarse
 
 		nombreDelArchivo := "qr_code.png"
-		error := qrcode.WriteFile(urlDelSitioWeb, qrcode.Medium, tamanoDeImagen, nombreDelArchivo)
+		_error := qrcode.WriteFile(urlDelSitioWeb, qrcode.Medium, tamanoDeImagen, nombreDelArchivo)
 
-		if error != nil {
-			log.Fatal("Error generar el código QR. ", error)
+		if _error != nil {
+			log.Fatal("Error generar el código QR. ", _error)
 		} else {
 			fmt.Println("¡Archivo de código QR creado!")
 		}
@@ -53,10 +53,10 @@ func enviarCodigoQR(respuesta http.ResponseWriter, _ *http.Request, _ httprouter
 func generarEtiquetaDeImagenHtmlDeCodigoQR() string {
 
 	//Datos de imagen de código qr
-	datosDeImagenDeCodigoQR, error := qrcode.Encode(urlDelSitioWeb, qrcode.High, tamanoDeImagen)
+	datosDeImagenDeCodigoQR, _error := qrcode.Encode(urlDelSitioWeb, qrcode.High, tamanoDeImagen)
 
-	if error != nil {
-		log.Fatalln("Error generar el código QR. ", error)
+	if _error != nil {
+		log.Fatalln("Error generar el código QR. ", _error)
 	}
 
 	datosCodificados := base64.StdEncoding.EncodeToString(datosDeImagenDeCodigoQR)
