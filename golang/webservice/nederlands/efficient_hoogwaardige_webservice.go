@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// This is a test
 type student struct {
 	ID       int    `json:"id"`
 	Naam     string `json:"naam"`
@@ -217,7 +218,8 @@ func lijstBevatRecord(naam string, leeftijd int) (bool, student) {
 	var student student
 
 	for _, studentGevonden := range studentenLijst {
-		if strings.ToLower(studentGevonden.Naam) == strings.ToLower(naam) && studentGevonden.Leeftijd == leeftijd {
+		if strings.ToLower(studentGevonden.Naam) == strings.ToLower(naam) &&
+			studentGevonden.Leeftijd == leeftijd {
 			bevatGegevens = true
 			student = studentGevonden
 		}
