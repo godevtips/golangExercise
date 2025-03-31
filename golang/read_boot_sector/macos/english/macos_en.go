@@ -1,10 +1,10 @@
 package main
 
 import (
+	"boot_sector/partition"
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"godevtips.com/m/v2/partition"
 	"log"
 	"os"
 )
