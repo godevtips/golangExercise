@@ -77,23 +77,3 @@ func GetDiskPartition(diskPath string) (DiskPartition, error) {
 		return UNKNOWN, errors.New("no valid MBR found. Disk may be uninitialized")
 	}
 }
-
-func main() {
-
-	//_, _ := getDiskPartition("/dev/sda1")
-
-	partition, readingPartitionError := GetDiskPartition("/dev/disk0")
-
-	if readingPartitionError != nil {
-		log.Fatal(readingPartitionError)
-	}
-
-	fmt.Println(partition)
-
-	//test := errors.New("Test Error message")
-	//
-	//message := fmt.Sprintf("Error message: %s", test)
-	//
-	//fmt.Println(message)
-
-}
