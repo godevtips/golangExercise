@@ -11,8 +11,8 @@ import (
 
 func main() {
 
-	diskPath := "/dev/disk0"
-	diskPartition, readingPartitionError := partition.GetDiskPartition(diskPath)
+	diskPath := "/dev/disk0" // Complete su propia ruta de disco
+	diskPartition, readingPartitionError := partition.ObtenerParticionDeDisco(diskPath)
 
 	if readingPartitionError != nil {
 		log.Fatal(readingPartitionError)

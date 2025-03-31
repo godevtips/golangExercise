@@ -11,8 +11,8 @@ import (
 
 func main() {
 
-	schijfPad := "/dev/disk0"
-	schijfPartitie, partitieLezenError := partition.GetDiskPartition(schijfPad)
+	schijfPad := "/dev/disk0" // Vul uw eigen schijfpad in
+	schijfPartitie, partitieLezenError := partition.SchijfPartitieOphalen(schijfPad)
 
 	if partitieLezenError != nil {
 		log.Fatal(partitieLezenError)

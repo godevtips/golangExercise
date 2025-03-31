@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	diskPath := "/dev/disk0"
+	diskPath := "/dev/disk0" // Fill you own disk path
 	diskPartition, readingPartitionError := partition.GetDiskPartition(diskPath)
 
 	if readingPartitionError != nil {
