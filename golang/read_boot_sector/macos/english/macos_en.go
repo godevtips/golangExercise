@@ -23,7 +23,7 @@ func main() {
 		readMBRBootSector(diskPath)
 	} else {
 		fmt.Printf("\nDisk is using GPT Partitioning.\n\n")
-		readGPTBootSector(diskPath)
+		readGPTData(diskPath)
 	}
 
 }
@@ -67,7 +67,7 @@ type GPTHeader struct {
 	PartitionSize     uint32   // Size of each partition entry
 }
 
-func readGPTBootSector(path string) {
+func readGPTData(path string) {
 	fmt.Printf("Reading GPT boot sector of '%s'..............\n\n", path)
 
 	file, err := os.Open(path)

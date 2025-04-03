@@ -84,14 +84,14 @@ func leeSectorGPT(ruta string) {
 		}
 	}(archivo)
 
-	// Seek to LBA 1 (GPT Header) -> 512 bytes offset
+	// Buscar LBA 1 (encabezado GPT) -> desplazamiento de 512 bytes
 	_, err = archivo.Seek(512, 0)
 	if err != nil {
 		fmt.Println("GPT header error:", err)
 		return
 	}
 
-	// Read GPT Header (92 bytes)
+	// Leer el encabezado GPT (92 bytes)
 	headerData := make([]byte, 92)
 	_, err = archivo.Read(headerData)
 	if err != nil {
@@ -99,7 +99,7 @@ func leeSectorGPT(ruta string) {
 		return
 	}
 
-	// Parse GPT header
+	// Analizar el encabezado GPT
 	var gptHeader GPTHeader
 	reader := bytes.NewReader(headerData)
 	err = binary.Read(reader, binary.LittleEndian, &gptHeader)
@@ -108,14 +108,14 @@ func leeSectorGPT(ruta string) {
 		return
 	}
 
-	// Check signature
+	// Comprobar firma
 	signature := gptHeader.Signatura[:]
 	if string(signature) != "EFI PART" {
 		fmt.Println("GPT Signatura invalido!")
 		return
 	}
 
-	// Print GPT details
+	// Imprimir detalles de GPT
 	fmt.Printf("|---------------- Datos GPT Header -----------------|\n\n")
 	fmt.Printf("  GUID del disco: %x\n", gptHeader.GUID_Del_Disco)
 	fmt.Printf("  Primero LBA: %d\n", gptHeader.LBA_Primero)
