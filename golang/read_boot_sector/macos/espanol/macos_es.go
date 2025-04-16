@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	diskPath := "/dev/disk0" // Complete su propia ruta de disco
+	diskPath := "/dev/disk0" // Reemplace con su propia ruta de disco
 	diskPartition, readingPartitionError := partition.ObtenerParticionDeDisco(diskPath)
 
 	if readingPartitionError != nil {
@@ -20,14 +20,14 @@ func main() {
 
 	if diskPartition == partition.MBR {
 		fmt.Printf("\n\nEl disco de destino utiliza particionamiento MBR.\n")
-		leeSectorDeArrangueMBR(diskPath)
+		leeSectorDeArranqueMBR(diskPath)
 	} else {
 		fmt.Printf("\nEl disco de destino utiliza particionamiento GPT.\n\n")
 		leeSectorGPT(diskPath)
 	}
 }
 
-func leeSectorDeArrangueMBR(ruta string) {
+func leeSectorDeArranqueMBR(ruta string) {
 
 	fmt.Printf("Leyendo el sector de arranque del MBR '%s'........", ruta)
 
