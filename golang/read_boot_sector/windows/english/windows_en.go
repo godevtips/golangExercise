@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	physicalDrive := int64(2)
+	physicalDrive := 2
 	partitionStyle, partitionError := windows_partition.GetDiskPartition(physicalDrive)
 	if partitionError != nil {
 		log.Fatal(partitionError)
@@ -22,14 +22,14 @@ func main() {
 		readMBRBootSector(physicalDrive)
 	} else {
 		fmt.Printf("\nDisk is using GPT Partitioning.\n\n")
-		//readGPTData(diskPath)
+		readGPTData(physicalDrive)
 	}
 }
 
-func readMBRBootSector(physicalDisk int64) {
+func readMBRBootSector(physicalDisk int) {
 	fmt.Printf("Reading MBR boot sector of physical disk '%d'........", physicalDisk)
 
-	path := windows_partition.GetPhysicalDrivePath(0)
+	path := windows_partition.GetPhysicalDrivePath(physicalDisk)
 
 	file, readingDiskError := os.Open(path)
 	if readingDiskError != nil {
@@ -67,15 +67,19 @@ type GPTHeader struct {
 	PartitionSize     uint32   // Size of each windows_partition entry
 }
 
-func readGPTData(path string) {
-	fmt.Printf("Reading GPT boot sector of '%s'..............\n\n", path)
+func readGPTData(physicalDisk int) {
 
-	file, err := os.Open(path)
+	physicalDiskPath := windows_partition.GetPhysicalDrivePath(physicalDisk)
+
+	const (
+		sectorSize      = 512
+		gptHeaderOffset = sectorSize // LBA 1
+	)
+
+	file, err := os.Open(physicalDiskPath)
 	if err != nil {
-		fmt.Println("Error opening disk:", err)
-		return
+		panic(err)
 	}
-
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
@@ -84,31 +88,30 @@ func readGPTData(path string) {
 	}(file)
 
 	// Seek to LBA 1 (GPT Header) -> 512 bytes offset
-	_, err = file.Seek(512, 0)
+	_, err = file.Seek(gptHeaderOffset, 0)
 	if err != nil {
-		fmt.Println("Error seeking to GPT header:", err)
-		return
+		panic(err)
 	}
 
 	// Read GPT Header (92 bytes)
-	headerData := make([]byte, 92)
-	_, err = file.Read(headerData)
+	buf := make([]byte, sectorSize)
+	_, err = file.Read(buf)
 	if err != nil {
-		fmt.Println("Error reading GPT header:", err)
-		return
+		panic(err)
 	}
 
 	// Parse GPT header
 	var gptHeader GPTHeader
-	reader := bytes.NewReader(headerData)
+	reader := bytes.NewReader(buf)
 	err = binary.Read(reader, binary.LittleEndian, &gptHeader)
 	if err != nil {
 		fmt.Println("Error parsing GPT header:", err)
 		return
 	}
 
-	// Check signature
+	// Verify GPT signature
 	signature := gptHeader.Signature[:]
+	//signature := string(buf[0:8])
 	if string(signature) != "EFI PART" {
 		fmt.Println("Invalid GPT Signature!")
 		return

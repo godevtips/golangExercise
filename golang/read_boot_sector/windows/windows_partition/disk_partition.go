@@ -42,11 +42,11 @@ func (partition DiskPartition) String() string {
 	}
 }
 
-func GetPhysicalDrivePath(physicalDrive int64) string {
-	return fmt.Sprintf("\\\\.\\PhysicalDrive%d", physicalDrive)
+func GetPhysicalDrivePath(physicalDrive int) string {
+	return fmt.Sprintf("\\\\.\\PhysicalDrive%d", int64(physicalDrive))
 }
 
-func GetDiskPartition(physicalDrive int64) (DiskPartition, error) {
+func GetDiskPartition(physicalDrive int) (DiskPartition, error) {
 
 	path := GetPhysicalDrivePath(physicalDrive)
 	utf16Path, err := syscall.UTF16PtrFromString(path)
