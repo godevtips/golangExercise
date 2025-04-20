@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	physicalDrive := 2
+	physicalDrive := 2 // your own physical disk number
 	partitionStyle, partitionError := windows_partition.GetDiskPartition(physicalDrive)
 	if partitionError != nil {
 		log.Fatal(partitionError)
