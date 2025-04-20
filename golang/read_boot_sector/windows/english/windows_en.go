@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	physicalDrive := 2 // your own physical disk number
+	physicalDrive := 0 // your own physical disk number
 	partitionStyle, partitionError := windows_partition.GetDiskPartition(physicalDrive)
 	if partitionError != nil {
 		log.Fatal(partitionError)
@@ -111,7 +111,6 @@ func readGPTData(physicalDisk int) {
 
 	// Verify GPT signature
 	signature := gptHeader.Signature[:]
-	//signature := string(buf[0:8])
 	if string(signature) != "EFI PART" {
 		fmt.Println("Invalid GPT Signature!")
 		return
