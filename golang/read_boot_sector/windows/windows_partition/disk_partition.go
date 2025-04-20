@@ -177,52 +177,86 @@ func SchijfPartitieOphalen(schijfpad string) (DiskPartition, error) {
 	}
 }
 
-func ObtenerParticionDeDisco(ruta string) (DiskPartition, error) {
+func ObtenerRutaDelDisco(numeroDeUnidad int) string {
+	return fmt.Sprintf("\\\\.\\PhysicalDrive%d", int64(numeroDeUnidad))
+}
+
+func ObtenerParticionDeDisco(numeroDeUnidad int) (DiskPartition, error) {
+
+	ruta := ObtenerRutaDelDisco(numeroDeUnidad)
+	rutaUtf16, err := syscall.UTF16PtrFromString(ruta)
+	if err != nil {
+		return UNKNOWN, err
+	}
+
+	handler, err := windows.CreateFile(
+		rutaUtf16,
+		windows.GENERIC_READ,
+		windows.FILE_SHARE_READ|windows.FILE_SHARE_WRITE,
+		nil,
+		windows.OPEN_EXISTING,
+		0,
+		0,
+	)
+	if err != nil {
+		return UNKNOWN, err
+	}
+	defer func(handle windows.Handle) {
+		err := windows.CloseHandle(handle)
+		if err != nil {
+			log.Fatalf("Error al cerrar el identificador de la ventana %v", err)
+		}
+	}(handler)
+
+	// Asignar un buffer suficientemente
+	tamanoDelBufer := 1024
+	bufer := make([]byte, tamanoDelBufer)
+	var bytesDevueltos uint32
+
+	err = windows.DeviceIoControl(
+		handler,
+		IOCTL_DISK_GET_PARTITION_INFO_EX,
+		nil,
+		0,
+		&bufer[0],
+		uint32(len(bufer)),
+		&bytesDevueltos,
+		nil,
+	)
+	if err != nil {
+		return -1, err
+	}
 
 	archivo, err := os.Open(ruta)
 	if err != nil {
-		return UNKNOWN, errors.New(fmt.Sprintf("Error al abrir el disco: %s", err))
+		fmt.Println(err)
+		return UNKNOWN, errors.New(fmt.Sprintf("Error opening disk: %s", err))
 	}
 
-	defer func(file *os.File) {
-		err := file.Close()
+	defer func(archivo *os.File) {
+		err := archivo.Close()
 		if err != nil {
 			log.Fatal(err)
 		}
 	}(archivo)
 
 	//Leer LBA 0 (MBR)
-	mbr := make([]byte, tamanoDelSector)
+	mbr := make([]byte, sectorSize)
 	_, err = archivo.Read(mbr)
 	if err != nil {
-		return UNKNOWN, errors.New(fmt.Sprintf("Error reading MBR: %s", err))
+		return UNKNOWN, errors.New(fmt.Sprintf("Error al leer el MBR: %s", err))
 	}
 
-	// Check for MBR signature (0x55AA at offset 510-511)
-	if mbr[510] == 0x55 && mbr[511] == 0xAA {
+	// Los primeros 4 bytes del búfer de salida (output) = enumeración particion del disco  (uint32)
+	particionDelDisco := *(*uint32)(unsafe.Pointer(&bufer[0]))
 
-		// Buscar LBA 1 (del GPT header)
-		_, err = archivo.Seek(tamanoDelSector, 0)
-		if err != nil {
-			return UNKNOWN, errors.New(fmt.Sprintf("Error al intentar acceder GPT header: %s", err))
-		}
+	switch particionDelDisco {
 
-		// Leer GPT header
-		gptHeader := make([]byte, 8)
-		_, err = archivo.Read(gptHeader)
-		if err != nil {
-			return UNKNOWN, errors.New(fmt.Sprintf("Error al leer el GPT header: %s", err))
-		}
-
-		// Check signatura del GPT
-		gptHeaderTexto := string(gptHeader)
-		if gptHeaderTexto == "EFI PART" {
-			return GPT, nil
-		} else {
-			return MBR, nil
-		}
-
-	} else {
-		return UNKNOWN, errors.New("no se encontró un MBR válido. Es posible que el disco no esté inicializado")
+	case PARTITION_STYLE_MBR:
+		return MBR, nil
+	case PARTITION_STYLE_GPT:
+		return GPT, nil
+	default:
+		return UNKNOWN, nil
 	}
 }

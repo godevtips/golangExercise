@@ -11,40 +11,48 @@ import (
 
 func main() {
 
-	diskPath := "/dev/disk0" // Reemplace con su propia ruta de disco
-	diskPartition, readingPartitionError := windows_partition.ObtenerParticionDeDisco(diskPath)
-
-	if readingPartitionError != nil {
-		log.Fatal(readingPartitionError)
+	numeroDeUnidadFisica := 2 //reemplace su propio número de disco físico
+	particion, errorDeParticion := windows_partition.ObtenerParticionDeDisco(numeroDeUnidadFisica)
+	if errorDeParticion != nil {
+		log.Fatal(errorDeParticion)
 	}
 
-	if diskPartition == windows_partition.MBR {
+	if errorDeParticion != nil {
+		log.Fatal(errorDeParticion)
+	}
+
+	rutaDelDisco := windows_partition.ObtenerRutaDelDisco(numeroDeUnidadFisica)
+
+	fmt.Println(rutaDelDisco)
+
+	if particion == windows_partition.MBR {
 		fmt.Printf("\n\nEl disco de destino utiliza particionamiento MBR.\n")
-		leeSectorDeArranqueMBR(diskPath)
+		leeSectorDeArranqueMBR(numeroDeUnidadFisica)
 	} else {
 		fmt.Printf("\nEl disco de destino utiliza particionamiento GPT.\n\n")
-		leeSectorGPT(diskPath)
+		//leeSectorGPT(rutaDelDisco)
 	}
 }
 
-func leeSectorDeArranqueMBR(ruta string) {
+func leeSectorDeArranqueMBR(numeroDelUnidad int) {
 
-	fmt.Printf("Leyendo el sector de arranque del MBR '%s'........", ruta)
+	ruta := windows_partition.ObtenerRutaDelDisco(numeroDelUnidad)
+	fmt.Printf("Leyendo el sector de arranque del MBR de '%s'........", ruta)
 
-	file, readingDiskError := os.Open(ruta)
-	if readingDiskError != nil {
-		log.Fatal("Error:", readingDiskError)
+	archivo, errorLeerDisco := os.Open(ruta)
+	if errorLeerDisco != nil {
+		log.Fatal("Error al abrir el disco:", errorLeerDisco)
 		return
 	}
 
 	byteSlice := make([]byte, 512)
-	numBytesRead, err := file.Read(byteSlice)
+	bytes, err := archivo.Read(byteSlice)
 	if err != nil {
 		log.Fatal("Error: " + err.Error())
 	}
 
 	fmt.Printf("\n\n|----------------- DATOS MBR ----------------|\n")
-	fmt.Printf("Bytes leídos: %d\n", numBytesRead)
+	fmt.Printf("Bytes leídos: %d\n", bytes)
 	fmt.Printf("Datos en formato decimal:\n%d\n", byteSlice)
 	fmt.Printf("Datos en formato hexadecimal:\n%x\n", byteSlice)
 	fmt.Printf("Data en formato string:\n%s\n", byteSlice)
