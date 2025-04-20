@@ -16,7 +16,6 @@ const (
 	// Partition styles
 	PARTITION_STYLE_MBR = 0
 	PARTITION_STYLE_GPT = 1
-	PARTITION_STYLE_RAW = 2
 )
 
 const sectorSize = 512      // Standard disk sector size
@@ -191,7 +190,7 @@ func SchijfPartitieOphalen(fysiekeSchijfNummer int) (DiskPartition, error) {
 	}(bestand)
 
 	//Lees LBA 0 (MBR)
-	mbr := make([]byte, sectorSize)
+	mbr := make([]byte, sectorgrootte)
 	_, err = bestand.Read(mbr)
 	if err != nil {
 		return UNKNOWN, errors.New(fmt.Sprintf("Fout bij het lezen van MBR: %s", err))
@@ -275,7 +274,7 @@ func ObtenerParticionDeDisco(numeroDeUnidad int) (DiskPartition, error) {
 	}(archivo)
 
 	//Leer LBA 0 (MBR)
-	mbr := make([]byte, sectorSize)
+	mbr := make([]byte, tamanoDelSector)
 	_, err = archivo.Read(mbr)
 	if err != nil {
 		return UNKNOWN, errors.New(fmt.Sprintf("Error al leer el MBR: %s", err))
