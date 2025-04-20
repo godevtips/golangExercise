@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	numeroDeUnidadFisica := 2 //reemplace su propio número de disco físico
+	numeroDeUnidadFisica := 0 //reemplace su propio número de disco físico
 	particion, errorDeParticion := windows_partition.ObtenerParticionDeDisco(numeroDeUnidadFisica)
 	if errorDeParticion != nil {
 		log.Fatal(errorDeParticion)
@@ -30,7 +30,7 @@ func main() {
 		leeSectorDeArranqueMBR(numeroDeUnidadFisica)
 	} else {
 		fmt.Printf("\nEl disco de destino utiliza particionamiento GPT.\n\n")
-		//leeSectorGPT(rutaDelDisco)
+		leeSectorGPT(numeroDeUnidadFisica)
 	}
 }
 
@@ -75,16 +75,20 @@ type GPTHeader struct {
 	TamanoDelParticion     uint32   // Tamaño de cada partición
 }
 
-func leeSectorGPT(ruta string) {
+func leeSectorGPT(numeroDelUnidad int) {
 
+	ruta := windows_partition.ObtenerRutaDelDisco(numeroDelUnidad)
 	fmt.Printf("Leyendo el sector de arranque GPT de '%s'..............\n\n", ruta)
+
+	const (
+		tamanoDelSector                = 512
+		desplazamientoDelEncabezadoGPT = tamanoDelSector // LBA 1
+	)
 
 	archivo, err := os.Open(ruta)
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		panic(err)
 	}
-
 	defer func(archivo *os.File) {
 		err := archivo.Close()
 		if err != nil {
@@ -93,32 +97,30 @@ func leeSectorGPT(ruta string) {
 	}(archivo)
 
 	// Buscar LBA 1 (encabezado GPT) -> desplazamiento de 512 bytes
-	_, err = archivo.Seek(512, 0)
+	_, err = archivo.Seek(desplazamientoDelEncabezadoGPT, 0)
 	if err != nil {
-		fmt.Println("GPT header error:", err)
-		return
+		panic(err)
 	}
 
 	// Leer el encabezado GPT (92 bytes)
-	headerData := make([]byte, 92)
-	_, err = archivo.Read(headerData)
+	bufer := make([]byte, tamanoDelSector)
+	_, err = archivo.Read(bufer)
 	if err != nil {
-		fmt.Println("Error leer GPT header:", err)
-		return
+		panic(err)
 	}
 
 	// Analizar el encabezado GPT
 	var gptHeader GPTHeader
-	reader := bytes.NewReader(headerData)
+	reader := bytes.NewReader(bufer)
 	err = binary.Read(reader, binary.LittleEndian, &gptHeader)
 	if err != nil {
 		fmt.Println("Error analizando GPT header:", err)
 		return
 	}
 
-	// Comprobar firma
-	signature := gptHeader.Signatura[:]
-	if string(signature) != "EFI PART" {
+	// Comprobar signatura
+	signatura := gptHeader.Signatura[:]
+	if string(signatura) != "EFI PART" {
 		fmt.Println("GPT Signatura invalido!")
 		return
 	}
@@ -132,5 +134,4 @@ func leeSectorGPT(ruta string) {
 	fmt.Printf("  Número de Particiones: %d\n", gptHeader.NumParticiones)
 	fmt.Printf("  Tamaño del particion: %d bytes\n\n", gptHeader.TamanoDelParticion)
 	fmt.Printf("|---------------- Datos GPT Header -----------------|\n\n")
-
 }
