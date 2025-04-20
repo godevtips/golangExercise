@@ -11,29 +11,29 @@ import (
 
 func main() {
 
-	schijfPad := "/dev/disk0" // Vul uw eigen schijfpad in
-	schijfPartitie, partitieLezenError := windows_partition.SchijfPartitieOphalen(schijfPad)
-
-	if partitieLezenError != nil {
-		log.Fatal(partitieLezenError)
+	FysiekeSchijf := 0 // Vul uw eigen fysieke schijf nummer in
+	partitieStijl, partitieError := windows_partition.SchijfPartitieOphalen(FysiekeSchijf)
+	if partitieError != nil {
+		log.Fatal(partitieError)
 	}
 
-	if schijfPartitie == windows_partition.MBR {
+	if partitieStijl == windows_partition.MBR {
 		fmt.Printf("\n\nSchijf maakt gebruik van MBR-partitionering.\n")
-		lessMBRBootSector(schijfPad)
+		leesMBRBootSector(FysiekeSchijf)
 	} else {
 		fmt.Printf("\nSchijf maakt gebruik van GPT-partitionering.\n\n")
-		leesGPTBootSector(schijfPad)
+		leesGPTBootSector(FysiekeSchijf)
 	}
-
 }
 
-func lessMBRBootSector(path string) {
-	fmt.Printf("Lezen van MBR-bootsector van '%s'........", path)
+func leesMBRBootSector(fysiekeSchijfNummer int) {
 
-	bestand, schijfOpenenError := os.Open(path)
-	if schijfOpenenError != nil {
-		log.Fatal("Error bij het openen van de schijf: ", schijfOpenenError)
+	pad := windows_partition.FysiekSchijfpadOphalen(fysiekeSchijfNummer)
+	fmt.Printf("Lezen van MBR-bootsector van '%s'........", pad)
+
+	bestand, schijfError := os.Open(pad)
+	if schijfError != nil {
+		log.Fatal("Error bij het openen van de schijf: ", schijfError)
 		return
 	}
 
@@ -67,15 +67,20 @@ type GPTHeader struct {
 	Partitiegrootte     uint32   // Grootte van elke partitie
 }
 
-func leesGPTBootSector(pad string) {
+func leesGPTBootSector(fysiekeSchijfNummer int) {
+
+	pad := windows_partition.FysiekSchijfpadOphalen(fysiekeSchijfNummer)
+	const (
+		sectorGrootte   = 512
+		gptHeaderOffset = sectorGrootte // LBA 1
+	)
+
 	fmt.Printf("Lezen van GPT opstartsector van '%s'..............\n\n", pad)
 
 	bestand, err := os.Open(pad)
 	if err != nil {
-		fmt.Println("Error bij het openen van de schijf: ", err)
-		return
+		panic(err)
 	}
-
 	defer func(bestand *os.File) {
 		err := bestand.Close()
 		if err != nil {
@@ -83,33 +88,31 @@ func leesGPTBootSector(pad string) {
 		}
 	}(bestand)
 
-	// Zoek naar LBA 1 (GPT-header) -> 512 bytes offset
-	_, err = bestand.Seek(512, 0)
+	// Seek to LBA 1 (GPT Header) -> 512 bytes offset
+	_, err = bestand.Seek(gptHeaderOffset, 0)
 	if err != nil {
-		fmt.Println("Error bij het zoeken naar GPT-Header: ", err)
-		return
+		panic(err)
 	}
 
-	// GPT-header lezen (92 bytes)
-	headerGegevens := make([]byte, 92)
-	_, err = bestand.Read(headerGegevens)
+	// Read GPT Header (92 bytes)
+	buffer := make([]byte, sectorGrootte)
+	_, err = bestand.Read(buffer)
 	if err != nil {
-		fmt.Println("Error bij het lezen van GPT-header: ", err)
-		return
+		panic(err)
 	}
 
 	// GPT-header bekijken
 	var gptHeader GPTHeader
-	lezer := bytes.NewReader(headerGegevens)
+	lezer := bytes.NewReader(buffer)
 	err = binary.Read(lezer, binary.LittleEndian, &gptHeader)
 	if err != nil {
-		fmt.Println("Error bij het lezen van de GPT-header:", err)
+		fmt.Println("Fout bij het parseren van GPT-header:", err)
 		return
 	}
 
-	// Handtekening controleer
-	handtekening := gptHeader.Handtekening[:]
-	if string(handtekening) != "EFI PART" {
+	// Verify GPT signature
+	signature := gptHeader.Handtekening[:]
+	if string(signature) != "EFI PART" {
 		fmt.Println("Ongeldige GPT-handtekening!")
 		return
 	}

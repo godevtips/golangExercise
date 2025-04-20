@@ -127,11 +127,60 @@ func GetDiskPartition(physicalDrive int) (DiskPartition, error) {
 	}
 }
 
-func SchijfPartitieOphalen(schijfpad string) (DiskPartition, error) {
+func FysiekSchijfpadOphalen(fysiekeSchijfNummer int) string {
+	return fmt.Sprintf("\\\\.\\PhysicalDrive%d", int64(fysiekeSchijfNummer))
+}
 
-	bestand, err := os.Open(schijfpad)
+func SchijfPartitieOphalen(fysiekeSchijfNummer int) (DiskPartition, error) {
+
+	pad := FysiekSchijfpadOphalen(fysiekeSchijfNummer)
+	utf16Pad, err := syscall.UTF16PtrFromString(pad)
 	if err != nil {
-		return UNKNOWN, errors.New(fmt.Sprintf("Error opening disk: %s", err))
+		return UNKNOWN, err
+	}
+
+	handle, err := windows.CreateFile(
+		utf16Pad,
+		windows.GENERIC_READ,
+		windows.FILE_SHARE_READ|windows.FILE_SHARE_WRITE,
+		nil,
+		windows.OPEN_EXISTING,
+		0,
+		0,
+	)
+	if err != nil {
+		return UNKNOWN, err
+	}
+	defer func(handle windows.Handle) {
+		err := windows.CloseHandle(handle)
+		if err != nil {
+			log.Fatalf("Fout bij het sluiten van de window handle %v", err)
+		}
+	}(handle)
+
+	// Zorg voor een voldoende buffer ruimte
+	buffergrootte := 1024
+	buffer := make([]byte, buffergrootte)
+	var geretourneerdeBytes uint32
+
+	err = windows.DeviceIoControl(
+		handle,
+		IOCTL_DISK_GET_PARTITION_INFO_EX,
+		nil,
+		0,
+		&buffer[0],
+		uint32(len(buffer)),
+		&geretourneerdeBytes,
+		nil,
+	)
+	if err != nil {
+		return -1, err
+	}
+
+	bestand, err := os.Open(pad)
+	if err != nil {
+		fmt.Println(err)
+		return UNKNOWN, errors.New(fmt.Sprintf("Fout bij het openen van de schijf: %s", err))
 	}
 
 	defer func(bestand *os.File) {
@@ -141,39 +190,24 @@ func SchijfPartitieOphalen(schijfpad string) (DiskPartition, error) {
 		}
 	}(bestand)
 
-	//Less LBA 0 (MBR)
-	mbr := make([]byte, sectorgrootte)
+	//Lees LBA 0 (MBR)
+	mbr := make([]byte, sectorSize)
 	_, err = bestand.Read(mbr)
 	if err != nil {
-		return UNKNOWN, errors.New(fmt.Sprintf("Error bij het lezen van MBR: %s", err))
+		return UNKNOWN, errors.New(fmt.Sprintf("Fout bij het lezen van MBR: %s", err))
 	}
 
-	// Controleer op MBR-handtekening (0x55AA op offset 510-511)
-	if mbr[510] == 0x55 && mbr[511] == 0xAA {
+	// Eerste 4 bytes van de uitvoerbuffer = PartitionStyle enum (uint32)
+	schijfPartitieStijl := *(*uint32)(unsafe.Pointer(&buffer[0]))
 
-		// Zoek naar LBA 1 (GPT header)
-		_, err = bestand.Seek(sectorgrootte, 0)
-		if err != nil {
-			return UNKNOWN, errors.New(fmt.Sprintf("Error bij het zoeken naar GPT header: %s", err))
-		}
+	switch schijfPartitieStijl {
 
-		// GPT-header lezen
-		gptHeader := make([]byte, 8)
-		_, err = bestand.Read(gptHeader)
-		if err != nil {
-			return UNKNOWN, errors.New(fmt.Sprintf("Error bij het lezen van GPT header: %s", err))
-		}
-
-		// Controleer GPT-handtekening
-		gptHeaderTekst := string(gptHeader)
-		if gptHeaderTekst == "EFI PART" {
-			return GPT, nil
-		} else {
-			return MBR, nil
-		}
-
-	} else {
-		return UNKNOWN, errors.New("geen geldige MBR gevonden. Schijf is mogelijk niet geïnitialiseerd")
+	case PARTITION_STYLE_MBR:
+		return MBR, nil
+	case PARTITION_STYLE_GPT:
+		return GPT, nil
+	default:
+		return UNKNOWN, nil
 	}
 }
 
